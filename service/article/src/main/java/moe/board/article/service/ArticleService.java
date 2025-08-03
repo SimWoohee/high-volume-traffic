@@ -6,6 +6,7 @@ import moe.board.article.entity.Article;
 import moe.board.article.repository.ArticleRepository;
 import moe.board.article.service.request.ArticleCreateRequest;
 import moe.board.article.service.request.ArticleUpdateRequest;
+import moe.board.article.service.response.ArticlePageResponse;
 import moe.board.article.service.response.ArticleResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,5 +43,17 @@ public class ArticleService {
     @Transactional
     public void delete(Long articleId){
         articleRepository.deleteById(articleId);
+    }
+
+    public ArticlePageResponse readAll(Long boardId, Long page, Long pageSize){
+        return ArticlePageResponse.of(
+                articleRepository.findAll(boardId, (page -1) * pageSize, pageSize).stream()
+                        .map(ArticleResponse::from)
+                        .toList(),
+                articleRepository.count(
+                        boardId,
+                        PageLimitCal.calculatePageLimit(page, pageSize, 10L)
+                )
+        );
     }
 }

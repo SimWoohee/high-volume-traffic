@@ -1,15 +1,25 @@
 package moe.board.article.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import moe.board.article.service.ArticleService;
 import moe.board.article.service.request.ArticleCreateRequest;
 import moe.board.article.service.request.ArticleUpdateRequest;
+import moe.board.article.service.response.ArticlePageResponse;
 import moe.board.article.service.response.ArticleResponse;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 public class ArticleController {
+    private ObjectMapper mapper;
+    @Before("create")
+    public void setUp(){
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+    }
 
     private  final ArticleService articleService;
 
@@ -17,6 +27,16 @@ public class ArticleController {
     public ArticleResponse read(@PathVariable Long articleId){
         return articleService.read(articleId);
     }
+
+    @GetMapping("/v1/articles")
+    public ArticlePageResponse readAll(
+            @RequestParam("boardId") Long boardId,
+            @RequestParam("page") Long page,
+            @RequestParam("pageSize") Long pageSize
+            ){
+        return articleService.readAll(boardId, page, pageSize);
+    }
+
 
     @PostMapping("/v1/articles")
     public ArticleResponse create(@RequestBody ArticleCreateRequest request){
