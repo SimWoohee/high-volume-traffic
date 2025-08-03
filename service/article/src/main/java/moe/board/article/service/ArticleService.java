@@ -11,6 +11,8 @@ import moe.board.article.service.response.ArticleResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
@@ -55,5 +57,14 @@ public class ArticleService {
                         PageLimitCal.calculatePageLimit(page, pageSize, 10L)
                 )
         );
+    }
+
+
+    public List<ArticleResponse> readAllInfiniteScroll(Long boardId, Long pageSize, Long lastArticleId){
+        List<Article> articles = lastArticleId == null ?
+            articleRepository.findAllInfiniteScroll(boardId, pageSize) :
+            articleRepository.findAllInfiniteScroll(boardId, pageSize, lastArticleId);
+
+        return articles.stream().map(ArticleResponse::from).toList();
     }
 }
